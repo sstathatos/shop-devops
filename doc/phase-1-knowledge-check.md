@@ -58,28 +58,8 @@ Explain exactly why hostname resolution works in Compose. In Kubernetes, what is
 # Start everything
 docker compose up --build
 
-# Create a product
-curl -X POST http://localhost:8000/api/products \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Widget", "price": "9.99", "stock": 100}'
-
-# Register + login
-curl -X POST http://localhost:8000/api/users/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "you@example.com", "password": "secret", "full_name": "You"}'
-
-TOKEN=$(curl -s -X POST http://localhost:8000/api/users/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "you@example.com", "password": "secret"}' | jq -r .access_token)
-
-# Place an order
-curl -X POST http://localhost:8000/api/orders \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"items": [{"product_id": "<id>", "name": "Widget", "quantity": 1, "unit_price": "9.99"}]}'
-
-# Check notification-service logs — should show "Order confirmed — sending notification"
-docker compose logs notification-service
+# Check homepage
+open http://localhost:3000
 
 # Check Jaeger for traces
 open http://localhost:16686
