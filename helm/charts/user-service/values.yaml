@@ -1,0 +1,44 @@
+replicaCount: 2
+
+image:
+  repository: shop/user-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8001
+
+healthPath: /health
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+# Non-sensitive env vars → ConfigMap
+config:
+  OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+
+# Sensitive env vars → Secret (set via --set or a values-secret.yaml not committed to git)
+secret:
+  DATABASE_URL: ""
+  JWT_SECRET: ""

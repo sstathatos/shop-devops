@@ -1,0 +1,41 @@
+replicaCount: 2
+
+image:
+  repository: shop/product-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8002
+
+healthPath: /health
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+config:
+  OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+
+secret:
+  DATABASE_URL: ""

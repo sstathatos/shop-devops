@@ -1,0 +1,26 @@
+apiVersion: v2
+name: shop-app
+description: Umbrella chart — installs all shop-devops services in one release
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: user-service
+    version: 0.1.0
+    repository: "file://../charts/user-service"
+  - name: product-service
+    version: 0.1.0
+    repository: "file://../charts/product-service"
+  - name: order-service
+    version: 0.1.0
+    repository: "file://../charts/order-service"
+  - name: notification-service
+    version: 0.1.0
+    repository: "file://../charts/notification-service"
+  - name: api-gateway
+    version: 0.1.0
+    repository: "file://../charts/api-gateway"
+  - name: frontend
+    version: 0.1.0
+    repository: "file://../charts/frontend"

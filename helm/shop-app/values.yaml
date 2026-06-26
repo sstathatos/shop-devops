@@ -1,0 +1,60 @@
+# Override values for each subchart.
+# Secrets (DATABASE_URL, JWT_SECRET, RABBITMQ_URL) must be supplied separately —
+# either via --set or a values-secret.yaml file that is NOT committed to git.
+
+user-service:
+  image:
+    repository: shop/user-service
+    tag: latest
+  config:
+    OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+  secret:
+    DATABASE_URL: ""
+    JWT_SECRET: ""
+
+product-service:
+  image:
+    repository: shop/product-service
+    tag: latest
+  config:
+    OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+  secret:
+    DATABASE_URL: ""
+
+order-service:
+  image:
+    repository: shop/order-service
+    tag: latest
+  config:
+    PRODUCT_SERVICE_URL: "http://shop-app-product-service"
+    OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+  secret:
+    DATABASE_URL: ""
+    RABBITMQ_URL: ""
+
+notification-service:
+  image:
+    repository: shop/notification-service
+    tag: latest
+  config:
+    OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+  secret:
+    RABBITMQ_URL: ""
+
+api-gateway:
+  image:
+    repository: shop/api-gateway
+    tag: latest
+  config:
+    USER_SERVICE_URL: "http://shop-app-user-service"
+    PRODUCT_SERVICE_URL: "http://shop-app-product-service"
+    ORDER_SERVICE_URL: "http://shop-app-order-service"
+    NOTIFICATION_SERVICE_URL: "http://shop-app-notification-service"
+    OTLP_ENDPOINT: "http://jaeger:4318/v1/traces"
+  secret:
+    JWT_SECRET: ""
+
+frontend:
+  image:
+    repository: shop/frontend
+    tag: latest

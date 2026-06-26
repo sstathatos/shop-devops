@@ -42,32 +42,42 @@ services:
   # ── Backend services ─────────────────────────────────────────────
 
   user-service:
-    build: ./backend/user-service
+    build:
+      context: ./backend/user-service
+      target: dev
     environment:
       DATABASE_URL: postgresql+asyncpg://shopuser:shoppass@postgres:5432/users_db
       JWT_SECRET: dev-secret-change-in-prod
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "8001:8001"
+    volumes:
+      - ./backend/user-service:/app
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
   product-service:
-    build: ./backend/product-service
+    build:
+      context: ./backend/product-service
+      target: dev
     environment:
       DATABASE_URL: postgresql+asyncpg://shopuser:shoppass@postgres:5432/products_db
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "8002:8002"
+    volumes:
+      - ./backend/product-service:/app
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
   order-service:
-    build: ./backend/order-service
+    build:
+      context: ./backend/order-service
+      target: dev
     environment:
       DATABASE_URL: postgresql+asyncpg://shopuser:shoppass@postgres:5432/orders_db
       RABBITMQ_URL: amqp://shopuser:shoppass@rabbitmq:5672/
@@ -75,6 +85,8 @@ services:
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "8003:8003"
+    volumes:
+      - ./backend/order-service:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,13 +95,17 @@ services:
     restart: unless-stopped
 
   celery-worker:
-    build: ./backend/order-service
+    build:
+      context: ./backend/order-service
+      target: dev
     command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=2
     environment:
       DATABASE_URL: postgresql+asyncpg://shopuser:shoppass@postgres:5432/orders_db
       RABBITMQ_URL: amqp://shopuser:shoppass@rabbitmq:5672/
       PRODUCT_SERVICE_URL: http://product-service:8002
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+    volumes:
+      - ./backend/order-service:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,19 +114,25 @@ services:
     restart: unless-stopped
 
   notification-service:
-    build: ./backend/notification-service
+    build:
+      context: ./backend/notification-service
+      target: dev
     environment:
       RABBITMQ_URL: amqp://shopuser:shoppass@rabbitmq:5672/
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "8004:8004"
+    volumes:
+      - ./backend/notification-service:/app
     depends_on:
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
 
   api-gateway:
-    build: ./backend/api-gateway
+    build:
+      context: ./backend/api-gateway
+      target: dev
     environment:
       JWT_SECRET: dev-secret-change-in-prod
       USER_SERVICE_URL: http://user-service:8001
@@ -120,6 +142,8 @@ services:
       OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/api-gateway:/app
     depends_on:
       - user-service
       - product-service
@@ -130,9 +154,16 @@ services:
   # ── Frontend ──────────────────────────────────────────────────────
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      API_GATEWAY_URL: http://api-gateway:8000
     ports:
-      - "3000:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - api-gateway
     restart: unless-stopped
